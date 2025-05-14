@@ -1,0 +1,12 @@
+[project]
+name = "trace-cs"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "openai==0.28.0",
+    "python-sat==1.8.dev13",
+    "sentence-transformers==3.0.1",
+    "ttkbootstrap==1.10.1",
+]
