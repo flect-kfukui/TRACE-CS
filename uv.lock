@@ -669,6 +669,12 @@ wheels = [
 ]
 
 [[package]]
+name = "pypblib"
+version = "0.0.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fb/f6/967cc8b9ea80c2a8e00913225de46d435ef441243ad1dd0a57935cc1d863/pypblib-0.0.4.tar.gz", hash = "sha256:71dd930bf177ca38d6eeb473702d05df07e11f20382db0c766465297eaf49062", size = 74033, upload-time = "2019-05-01T11:11:59.026Z" }
+
+[[package]]
 name = "python-sat"
 version = "1.8.dev13"
 source = { registry = "https://pypi.org/simple" }
@@ -997,6 +1003,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "openai" },
+    { name = "pypblib" },
     { name = "python-sat" },
     { name = "sentence-transformers" },
     { name = "ttkbootstrap" },
@@ -1005,6 +1012,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "openai", specifier = "==0.28.0" },
+    { name = "pypblib", specifier = ">=0.0.4" },
     { name = "python-sat", specifier = "==1.8.dev13" },
     { name = "sentence-transformers", specifier = "==3.0.1" },
     { name = "ttkbootstrap", specifier = "==1.10.1" },
