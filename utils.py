@@ -1,9 +1,10 @@
-from pysat.formula import WCNF, CNF
-from pysat.examples.optux import OptUx
-from pysat.examples.lbx import LBX
-from pysat.examples.rc2 import RC2
 from collections import defaultdict
+
 from pysat.examples.hitman import Hitman
+from pysat.examples.lbx import LBX
+from pysat.examples.optux import OptUx
+from pysat.examples.rc2 import RC2
+from pysat.formula import CNF, WCNF
 from pysat.solvers import Solver
 
 
@@ -14,62 +15,55 @@ def get_vars(KB):
             variables.add(abs(l))
     return variables
 
-def map_explanation(explanation, vpool):
-	mapped_explanation = []
-	for e in explanation:
-		sub_e = [vpool.obj(i) for i in e if i>0 and vpool.obj(i)]
-		mapped_explanation.extend(sub_e)
-	return mapped_explanation
 
+def map_explanation(explanation, vpool):
+    mapped_explanation = []
+    for e in explanation:
+        sub_e = [vpool.obj(i) for i in e if i > 0 and vpool.obj(i)]
+        mapped_explanation.extend(sub_e)
+    return mapped_explanation
 
 
 def get_MUS(public, private, q, vpool):
-	# Compute a minimal unsatisfiable set
-	wcnf2 = WCNF()
-	if public:
-		for c in public:
-			wcnf2.append(c, weight=1)
+    # Compute a minimal unsatisfiable set
+    wcnf2 = WCNF()
+    if public:
+        for c in public:
+            wcnf2.append(c, weight=1)
 
-	if private:
-		for c in private:
-			wcnf2.append(c, weight=100)
+    if private:
+        for c in private:
+            wcnf2.append(c, weight=100)
 
+    wcnf2.extend((q.negate(topv=vpool.top).clauses))
 
-	wcnf2.extend((q.negate(topv=vpool.top).clauses))
+    # wcnf2.extend(q)
 
-	# wcnf2.extend(q)
-
-	solver = OptUx(wcnf2)
-	mus = solver.compute()
-	expl  = [list(wcnf2.soft[m - 1]) for m in mus]
-	return expl
-	return map_explanation(expl, vpool)
-
+    solver = OptUx(wcnf2)
+    mus = solver.compute()
+    expl = [list(wcnf2.soft[m - 1]) for m in mus]
+    return expl
+    return map_explanation(expl, vpool)
 
 
 def get_MCS(public, private, q, vpool):
-	# Compute minimal hitting set
-	wcnf = WCNF()
-	if public:
-		for c in public:
-			wcnf.append(c, weight=1)
+    # Compute minimal hitting set
+    wcnf = WCNF()
+    if public:
+        for c in public:
+            wcnf.append(c, weight=1)
 
-	if private:
-		for c in private:
-			wcnf.append(c, weight=100)
+    if private:
+        for c in private:
+            wcnf.append(c, weight=100)
 
-	# wcnf.extend(q.negate(topv=vpool.top).clauses)
-	wcnf.extend(q)
+    # wcnf.extend(q.negate(topv=vpool.top).clauses)
+    wcnf.extend(q)
 
-	lbx = LBX(wcnf, use_cld=True, solver_name='g3')
-	# Compute mcs and return the clauses indexes
-	mcs = lbx.compute()
-	return [list(wcnf.soft[m - 1]) for m in mcs]
-
-
-
-
-
+    lbx = LBX(wcnf, use_cld=True, solver_name="g3")
+    # Compute mcs and return the clauses indexes
+    mcs = lbx.compute()
+    return [list(wcnf.soft[m - 1]) for m in mcs]
 
 
 def create_lookup_dict(clasues):
@@ -91,20 +85,19 @@ def get_clauses_from_index(seed, clauses_dict):
             print("YO", clauses_dict[s])
             cls.extend(clauses_dict[s])
     return cls
+
+
 def get_index_from_clauses(seed, clauses_dict):
-	idx = []
-	for s in seed:
-		for key, val in clauses_dict.items():
-			if val == s:
-				idx.append(key)
-	return idx
-
-
-
+    idx = []
+    for s in seed:
+        for key, val in clauses_dict.items():
+            if val == s:
+                idx.append(key)
+    return idx
 
 
 def SAT(KB1, KB2):
-    s = Solver(name='g4')
+    s = Solver(name="g4")
     for k in KB1 + KB2:
         s.add_clause(k)
     if s.solve():
@@ -114,7 +107,7 @@ def SAT(KB1, KB2):
 
 
 def skeptical_entailment(scheduler, KB, seed, q):
-	# Check if KB entails a query
+    # Check if KB entails a query
     s = Solver()
     for k in KB:
         s.add_clause(k)
@@ -126,22 +119,21 @@ def skeptical_entailment(scheduler, KB, seed, q):
     if s.solve() == False:
         s.delete()
         return True
-    else: 
+    else:
         return False
 
 
+def getMCS(KB, lits, query, seed):
 
-def getMCS(KB, lits, query, seed): 
-	
     wcnf = WCNF()
-    
+
     # add seed as hard
-    for s in seed:	
+    for s in seed:
         wcnf.append(s)
 
     # add query as hard
     wcnf.extend(query)
-    
+
     # add remaining clauses as soft
     for k in KB:
         if k not in seed:
@@ -149,21 +141,21 @@ def getMCS(KB, lits, query, seed):
     for l in lits:
         wcnf.append(l, weight=0)
 
-    lbx = LBX(wcnf, solver_name='g4', use_cld=True, use_timer=True)
+    lbx = LBX(wcnf, solver_name="g4", use_cld=True, use_timer=True)
     mcs = lbx.compute()
     # print('MCS oracle time: {0:.4f}'.format(lbx.oracle_time()))
-    
+
     if mcs:
         return [list(wcnf.soft[m - 1]) for m in mcs]
     else:
         return [[]]
-    
+
 
 def getMCS_MaxSAT(scheduler, KB, lits, query, seed):
     wcnf = WCNF()
-    
+
     # add seed as hard
-    for s in seed:	
+    for s in seed:
         wcnf.append(s)
 
     # add query as hard
@@ -171,20 +163,20 @@ def getMCS_MaxSAT(scheduler, KB, lits, query, seed):
 
     for l in lits:
         wcnf.append(l)
-    
+
     # add KB clauses as soft
     for k in KB:
         if k not in seed:
             wcnf.append(k, weight=5)
-    
-    RC = RC2(wcnf, solver='g4', adapt=True)
+
+    RC = RC2(wcnf, solver="g4", adapt=True)
     model = RC.compute()
 
     mcs_KB = []
     for label in scheduler.templates:
         s = Solver("g3")
         s.append_formula(scheduler.templates[label])
-        if not s.solve(assumptions = model):
+        if not s.solve(assumptions=model):
             mcs_KB.extend(scheduler.templates[label])
             s.delete()
     return mcs_KB
@@ -201,9 +193,9 @@ def get_vars(KB):
 def explanation(scheduler, KB, lits, query):
 
     # idx2cls, cls2idx = create_lookup_dict(scheduler.templates)
-    
+
     blocked = []
-    R = Hitman(htype='maxsat')  # Reconciliation formula
+    R = Hitman(htype="maxsat")  # Reconciliation formula
     # wcnf = WCNF()
     # for c in KB:
     #     wcnf.append(c, weight=1)
@@ -222,20 +214,20 @@ def explanation(scheduler, KB, lits, query):
         for s in seed:
             e_plus.extend(scheduler.templates[s])
             template_expl.append(s)
-      
+
         # print(seed)
-        if SAT(e_plus, []) and not SAT(e_plus + lits, query):    
+        if SAT(e_plus, []) and not SAT(e_plus + lits, query):
             # R.block(seed) # block the seed to generate a new explanation
             return template_expl
         else:
-            mcs = getMCS(KB,lits, query, e_plus)
+            mcs = getMCS(KB, lits, query, e_plus)
             # mcs = getMCS_MaxSAT(scheduler, KB, lits, query, e_plus)
             # Add all relevant clauses from scheduler to C
             if mcs != [[]]:
                 relevant_clauses = add_relevant_clauses(scheduler, mcs)
-                # C_indexed = [] 
+                # C_indexed = []
                 # for r in relevant_clauses:
-                    # C_indexed.append(cls2idx[r])
+                # C_indexed.append(cls2idx[r])
                 R.hit(relevant_clauses)
 
 
@@ -252,12 +244,11 @@ def add_relevant_clauses(scheduler, C):
 def repair(KB, model):
     wcnf = WCNF()
     for c in KB:
-        wcnf.append(c, weight = 1)
+        wcnf.append(c, weight=1)
     wcnf.extend(model)
-    MCS = LBX(wcnf, solver_name='CryptoMinisat')
+    MCS = LBX(wcnf, solver_name="CryptoMinisat")
     mcs = MCS.compute()
     mcs_clauses = [list(wcnf.soft[m - 1]) for m in mcs]
     new_KB = [c for c in KB if c not in mcs_clauses]
     new_KB.extend(model)
-    return new_KB 
-    
+    return new_KB
