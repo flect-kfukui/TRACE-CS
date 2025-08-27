@@ -1,5 +1,5 @@
 import copy
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Union
 
 import openai
 from pysat.examples.lbx import LBX
@@ -247,7 +247,7 @@ def process_query(
 
 def post_process_query(
     scheduler: CourseScheduler, extracted_info: List[str]
-) -> List[Tuple[str, Any, Any, Any]]:
+) -> List[Tuple[str, Union[int, str], Union[bool, str], Union[int, str]]]:
     """Post-process extracted query information and validate course/semester constraints.
 
     Parameters

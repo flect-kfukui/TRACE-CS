@@ -196,7 +196,7 @@ def get_clauses_from_index(
     return cls
 
 
-def get_index_from_clauses(seed: List[int], clauses_dict: Dict[Any, Any]) -> List[int]:
+def get_index_from_clauses(seed: List[Any], clauses_dict: Dict[Any, Any]) -> List[int]:
     """Get indices corresponding to clauses using a reverse lookup dictionary.
 
     Parameters
