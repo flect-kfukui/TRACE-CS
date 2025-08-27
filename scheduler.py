@@ -2,6 +2,7 @@ import json
 import random
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+from loguru import logger
 from pysat.card import CardEnc
 from pysat.formula import WCNF, IDPool
 from pysat.pb import EncType, PBEnc
@@ -76,7 +77,7 @@ class CourseScheduler:
         self.total_semesters = 8
         self.num_semesters = self.total_semesters - self.current_semester
         self.max_schedule_count = user_input["max_schedule_count"]
-        # print(self.max_schedule_count)
+        # logger.debug(self.max_schedule_count)
 
         self.courses = {}
         self.load_courses(core_courses_file, course_type="core")
@@ -226,7 +227,7 @@ class CourseScheduler:
                     f"Course {course_code} is a course preferred by you."
                 ] = clauses
             else:
-                print(
+                logger.debug(
                     f"Warning: Preferred course {course_code} not found in the course list."
                 )
 
@@ -248,7 +249,7 @@ class CourseScheduler:
             encoding=EncType.best,
             vpool=self.vpool,
         ).clauses
-        # print(len(clause))
+        logger.debug(f"clause length: {len(clause)}")
         self.cnf.extend(clause)
         self.templates[
             f"The total credits for all scheduled courses must sum up to {self.total_credits}."
@@ -311,7 +312,7 @@ class CourseScheduler:
                 for course_code, course in self.courses.items()
                 if course["type"] == "science_elective"
             ]
-            # print(clause)
+            logger.debug(f"clause: {clause}")
             self.cnf.extend(clause)
             self.templates["You cannot take any more science elective courses."] = (
                 clause
@@ -433,7 +434,7 @@ class CourseScheduler:
                 clauses = []
                 for s in range(self.num_semesters):
                     clause = [self.var(course_index), -self.var(course_index, s)]
-                    # print(clause)
+                    logger.debug(f"clause: {clause}")
                     self.cnf.append(clause)
                     clauses.append(clause)
                 self.templates[
@@ -517,13 +518,13 @@ class CourseScheduler:
             - true_courses_lits: List of true course literals for each schedule
         """
         self.generate_constraints()
-        # print(len(self.cnf.hard+ self.cnf.soft))
-        # print(self.var_to_course[2])
+        # logger.debug(len(self.cnf.hard+ self.cnf.soft))
+        # logger.debug(self.var_to_course[2])
         # exit()
-        # print(self.var_to_course[442])
-        # print(self.var_to_course[440])
+        # logger.debug(self.var_to_course[442])
+        # logger.debug(self.var_to_course[440])
 
-        # print(self.var_to_course)
+        # logger.debug(self.var_to_course)
 
         solver = Solver("g4")
         solver.append_formula(self.cnf.hard + self.cnf.soft)

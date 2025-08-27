@@ -1,9 +1,10 @@
 import copy
 import os
-from typing import Any, Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 import openai
 from dotenv import load_dotenv
+from loguru import logger
 from pysat.examples.lbx import LBX
 from pysat.examples.optux import OptUx
 from pysat.formula import CNF, WCNF
@@ -267,14 +268,14 @@ def post_process_query(
         List of tuples containing (course_code, semester, condition, query_var)
         where condition may be a boolean or error message string.
     """
-    print(extracted_info)
+    logger.debug(extracted_info)
     query_data = []
     for info in extracted_info:
         course_name, semester, condition = info.split(",")
-        print(course_name)
+        logger.debug(course_name)
 
         course_name = course_name.removeprefix("Course Name: ")
-        print(course_name)
+        logger.debug(course_name)
 
         semester = semester.strip(" Semester:")
         condition = condition.strip(" Condition:").lower()
@@ -315,7 +316,7 @@ def post_process_query(
                             scheduler.course_vars[course_name]["var"],
                         )
                     )
-                    # print(query_data)
+                    logger.debug(query_data)
             else:
                 if int(semester) > 8:
                     query_data.append(
@@ -340,7 +341,7 @@ def post_process_query(
                     semester_number = int(semester) - scheduler.current_semester - 1
                     if condition == "positive":
                         # query_vars.append(scheduler.course_vars[course_name]['semester_vars'][semester_number])
-                        # print(course_name, semester_number)
+                        # logger.debug(course_name, semester_number)
                         query_data.append(
                             (
                                 course_name,
@@ -416,7 +417,7 @@ def contrastive_explanations(
 
     # Construct the query clauses
     for query_course_code, semester_number, condition, query_var in query_data:
-        # print(query_course_code, semester_number, condition, query_var)
+        # logger.debug(query_course_code, semester_number, condition, query_var)
 
         if condition == "This course does not exist.":
             Explanations.append(
@@ -496,7 +497,7 @@ def contrastive_explanations(
                             neg_queries.append(v)
 
     Q = CNF(from_clauses=pos_queries.clauses + neg_queries.clauses)
-    print(Q.clauses)
+    logger.debug(Q.clauses)
 
     # Construct the KB
     KB = [clause for clause in scheduler.cnf.hard + scheduler.cnf.soft]
@@ -505,7 +506,7 @@ def contrastive_explanations(
         while True:
             if SAT(KB, updated_true_lits):
                 if not SAT(KB + updated_true_lits, Q.clauses):
-                    print("Query conflicts with the knowledge base.")
+                    logger.debug("Query conflicts with the knowledge base.")
                     template_expl = explanation(
                         scheduler, KB, updated_true_lits, Q.clauses
                     )
@@ -513,7 +514,7 @@ def contrastive_explanations(
                     return Explanations
 
                 # elif SAT(KB + updated_true_lits, Q.negate(topv=scheduler.vpool.top).clauses) == False:
-                #     print("Negated query is entailed")
+                #     logger.debug("Negated query is entailed")
                 #     template_expl = explanation(scheduler, KB + updated_true_lits, Q.negate(topv=scheduler.vpool.top).clauses)
                 #     Explanations.append(' '.join(template_expl))
                 #     return Explanations
@@ -524,7 +525,7 @@ def contrastive_explanations(
                     return Explanations
 
             else:
-                print("repairing...")
+                logger.debug("repairing...")
                 KB = repair(KB, updated_true_lits)
 
     return Explanations
@@ -638,7 +639,7 @@ def explain_why_not_query(
     s.append_formula(sat_kb)
     s.append_formula(pos_queries)
     sol = s.solve()
-    # print(sol)
+    logger.debug(f"solution: {sol}")
     if sol:
         if all_pos_query_courses:
             explanations.append(
@@ -672,7 +673,7 @@ def explain_why_not_query(
             count += 1
             if count == max_count:
                 break
-        print(mus_explanations)
+        logger.debug(mus_explanations)
         for expl in mus_explanations:
             temp = []
             for e in expl:

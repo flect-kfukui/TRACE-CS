@@ -3,6 +3,7 @@ from tkinter import filedialog
 from typing import Any, List
 
 import ttkbootstrap as ttk
+from loguru import logger
 
 from explainer import (
     contrastive_explanations,
@@ -131,10 +132,10 @@ def previous_schedule() -> None:
 
 def next_schedule() -> None:
     global current_schedule_index
-    # print("Next Schedule button clicked")
-    # print("Current schedule index before:", current_schedule_index)
+    logger.debug("Next Schedule button clicked")
+    logger.debug("Current schedule index before:", current_schedule_index)
     current_schedule_index = (current_schedule_index + 1) % len(schedules)
-    # print("Current schedule index after:", current_schedule_index)
+    logger.debug("Current schedule index after:", current_schedule_index)
     update_schedule_display()
     update_navigation_buttons()
 
@@ -149,7 +150,7 @@ def update_navigation_buttons() -> None:
 
 
 def update_schedule_display() -> None:
-    # print("Updating schedule display")
+    logger.debug("Updating schedule display")
     for widget in schedule_frame.winfo_children():
         if isinstance(widget, ttk.Button) and widget.cget("text") not in [
             f"Semester {i+1}" for i in range(scheduler.total_semesters)
@@ -171,9 +172,9 @@ def update_schedule_display() -> None:
                 course_button.grid(row=j + 1, column=i, padx=10, pady=5)
         elif i >= scheduler.current_semester - 1:
 
-            # print(f"Displaying courses for Semester {i+1}")
+            logger.debug(f"Displaying courses for Semester {i+1}")
             for j, course in enumerate(schedules[current_schedule_index][i]):
-                # print(f"Displaying course: {course}")
+                logger.debug(f"Displaying course: {course}")
                 course_button = ttk.Button(
                     schedule_frame, text=course, style="Green.TButton"
                 )
@@ -299,14 +300,14 @@ def submit_query() -> None:
     query = query_input.get()
     extracted_info = process_query(scheduler, schedules[current_schedule_index], query)
     query_data = post_process_query(scheduler, extracted_info)
-    print(query_data)
+    logger.debug(query_data)
 
     # Display the extracted query information to the user for verification
     invalid_query = False
     verification_text = ""
     for course_code, semester_number, condition, query_var in query_data:
         if condition is not True and condition is not False:
-            # print(f"Wrong query: {condition}")
+            logger.debug(f"Wrong query: {condition}")
             verification_text += (
                 f"Invalid query: {condition} Please type another query.\n"
             )
@@ -377,7 +378,7 @@ def confirm_query(query: str, query_data: List[Any]) -> None:
     explanations = contrastive_explanations(
         scheduler, schedules, current_schedule_index, true_lits, query_data
     )
-    print(explanations)
+    logger.debug(explanations)
     explanation_text.delete(1.0, tk.END)
     if explanations:
         post_processed_explanations = [

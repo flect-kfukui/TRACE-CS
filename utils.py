@@ -1,6 +1,7 @@
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
+from loguru import logger
 from pysat.examples.hitman import Hitman
 from pysat.examples.lbx import LBX
 from pysat.examples.optux import OptUx
@@ -190,8 +191,8 @@ def get_clauses_from_index(
     if seed:
         # seed = [item for sublist in seed for item in sublist]
         for s in seed:
-            # print(s,'la')
-            print("YO", clauses_dict[s])
+            logger.debug(f"{s} la")
+            logger.debug("YO", clauses_dict[s])
             cls.extend(clauses_dict[s])
     return cls
 
@@ -323,7 +324,7 @@ def getMCS(
 
     lbx = LBX(wcnf, solver_name="g4", use_cld=True, use_timer=True)
     mcs = lbx.compute()
-    # print('MCS oracle time: {0:.4f}'.format(lbx.oracle_time()))
+    logger.debug("MCS oracle time: {0:.4f}".format(lbx.oracle_time()))
 
     if mcs:
         return [list(wcnf.soft[m - 1]) for m in mcs]
@@ -432,7 +433,7 @@ def explanation(
             e_plus.extend(scheduler.templates[s])
             template_expl.append(s)
 
-        # print(seed)
+        logger.debug(f"seed: {seed}")
         if SAT(e_plus, []) and not SAT(e_plus + lits, query):
             # R.block(seed) # block the seed to generate a new explanation
             return template_expl
