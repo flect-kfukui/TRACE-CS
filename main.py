@@ -298,6 +298,7 @@ def submit_query() -> None:
     before generating explanations.
     """
     query = query_input.get()
+    logger.info(f"User query: {query}")
     extracted_info = process_query(scheduler, schedules[current_schedule_index], query)
     query_data = post_process_query(scheduler, extracted_info)
     logger.debug(query_data)
