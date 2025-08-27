@@ -1,6 +1,7 @@
 import copy
 import tkinter as tk
 from tkinter import filedialog
+from typing import Any, Dict, List, Optional
 
 import ttkbootstrap as ttk
 from pysat.card import CardEnc, EncType
@@ -59,7 +60,7 @@ schedule_frame.grid(row=0, column=0, padx=10, pady=10, sticky=(tk.W, tk.E, tk.N,
 
 
 # Function to export the schedule to a file
-def export_schedule():
+def export_schedule() -> None:
     """Export the current schedule to a text file.
 
     Opens a file dialog for the user to choose save location and exports
@@ -156,7 +157,7 @@ def update_navigation_buttons():
     )
 
 
-def update_schedule_display():
+def update_schedule_display() -> None:
     # print("Updating schedule display")
     for widget in schedule_frame.winfo_children():
         if isinstance(widget, ttk.Button) and widget.cget("text") not in [
@@ -297,7 +298,7 @@ confirmation_frame = ttk.Frame(details_frame)
 confirmation_frame.pack(fill=tk.X, padx=5, pady=(0, 5))
 
 
-def submit_query():
+def submit_query() -> None:
     """Process user query and display verification information.
 
     Extracts course and semester information from the natural language query,
@@ -370,7 +371,7 @@ def submit_query():
             reject_button.destroy()
 
 
-def confirm_query(query, query_data):
+def confirm_query(query: str, query_data: List[Any]) -> None:
     """Generate and display contrastive explanations for the confirmed query.
 
     Parameters
@@ -452,7 +453,7 @@ def calculate_semantic_similarity(
     similarity_label.pack(side=tk.LEFT, padx=(10, 0))
 
 
-def reject_query():
+def reject_query() -> None:
     # Clear the query input field and explanation text widget
     query_input.delete(0, tk.END)
     explanation_text.delete(1.0, tk.END)

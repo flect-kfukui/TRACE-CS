@@ -1,5 +1,6 @@
 import json
 import random
+from typing import Any, Dict, List, Optional, Tuple
 
 from pysat.card import CardEnc
 from pysat.examples.rc2 import RC2
@@ -17,14 +18,14 @@ class CourseScheduler:
 
     def __init__(
         self,
-        core_courses_file,
-        methods_elective_files,
-        systems_elective_files,
-        cs_electives_file,
-        sciences_electives_file,
-        social_electives_file,
-        user_input_file,
-    ):
+        core_courses_file: str,
+        methods_elective_files: str,
+        systems_elective_files: str,
+        cs_electives_file: str,
+        sciences_electives_file: str,
+        social_electives_file: str,
+        user_input_file: str,
+    ) -> None:
         """Initialize the CourseScheduler with course data and user preferences.
 
         Parameters
@@ -96,7 +97,7 @@ class CourseScheduler:
         self.vpool = IDPool()
         self.cnf = WCNF()
 
-    def load_courses(self, file_path, course_type=None):
+    def load_courses(self, file_path: str, course_type: Optional[str] = None) -> None:
         """Load courses from a JSON file and assign course type.
 
         Parameters
@@ -112,7 +113,7 @@ class CourseScheduler:
             course["type"] = course_type
             self.courses[course["code"]] = course
 
-    def extract_prerequisites(self):
+    def extract_prerequisites(self) -> Dict[str, List[str]]:
         """Extract prerequisites information from loaded courses.
 
         Returns
@@ -126,7 +127,7 @@ class CourseScheduler:
             prerequisites[course_code] = prereqs
         return prerequisites
 
-    def var(self, c, s=None):
+    def var(self, c: int, s: Optional[int] = None) -> int:
         """Generate SAT variable for a course or course-semester combination.
 
         Parameters
@@ -146,7 +147,7 @@ class CourseScheduler:
         else:
             return self.vpool.id(f"c{c}_s{s}")
 
-    def generate_constraints(self):
+    def generate_constraints(self) -> None:
         """Generate SAT constraints for course scheduling requirements.
 
         Creates constraints for:
@@ -480,7 +481,7 @@ class CourseScheduler:
                                 f"Course {course_code} and its prerequisite {prereq} cannot be taken in the same semester {s + self.current_semester + 1}."
                             ] = [clause]
 
-    def solve(self):
+    def solve(self) -> Tuple[List[List[List[str]]], List[Any], List[List[List[int]]]]:
         """Solve the course scheduling problem and generate multiple schedules.
 
         Returns

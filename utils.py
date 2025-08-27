@@ -1,14 +1,17 @@
 from collections import defaultdict
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from pysat.examples.hitman import Hitman
 from pysat.examples.lbx import LBX
 from pysat.examples.optux import OptUx
 from pysat.examples.rc2 import RC2
-from pysat.formula import CNF, WCNF
+from pysat.formula import CNF, WCNF, IDPool
 from pysat.solvers import Solver
 
+from scheduler import CourseScheduler
 
-def get_vars(KB):
+
+def get_vars(KB: List[List[int]]) -> Set[int]:
     """Extract all unique variables from a knowledge base.
 
     Parameters
@@ -29,7 +32,7 @@ def get_vars(KB):
     return variables
 
 
-def map_explanation(explanation, vpool):
+def map_explanation(explanation: List[List[int]], vpool: IDPool) -> List[Any]:
     """Map explanation indices to their corresponding objects using a variable pool.
 
     Parameters
@@ -51,7 +54,12 @@ def map_explanation(explanation, vpool):
     return mapped_explanation
 
 
-def get_MUS(public, private, q, vpool):
+def get_MUS(
+    public: Optional[List[List[int]]],
+    private: Optional[List[List[int]]],
+    q: CNF,
+    vpool: IDPool,
+) -> List[List[int]]:
     """Compute a minimal unsatisfiable set (MUS) from public and private knowledge bases.
 
     Parameters
@@ -91,7 +99,12 @@ def get_MUS(public, private, q, vpool):
     return map_explanation(expl, vpool)
 
 
-def get_MCS(public, private, q, vpool):
+def get_MCS(
+    public: Optional[List[List[int]]],
+    private: Optional[List[List[int]]],
+    q: CNF,
+    vpool: IDPool,
+) -> List[List[int]]:
     """Compute minimal correction set (MCS) using LBX algorithm.
 
     Parameters
@@ -129,7 +142,7 @@ def get_MCS(public, private, q, vpool):
     return [list(wcnf.soft[m - 1]) for m in mcs]
 
 
-def create_lookup_dict(clasues):
+def create_lookup_dict(clasues: List[Any]) -> Tuple[defaultdict, defaultdict]:
     """Create bidirectional lookup dictionaries for clauses.
 
     Parameters
@@ -153,7 +166,9 @@ def create_lookup_dict(clasues):
     return idx_to_cls, cls_to_index
 
 
-def get_clauses_from_index(seed, clauses_dict):
+def get_clauses_from_index(
+    seed: Optional[List[int]], clauses_dict: Dict[int, Any]
+) -> List[Any]:
     """Retrieve clauses from indices using a lookup dictionary.
 
     Parameters
@@ -178,7 +193,7 @@ def get_clauses_from_index(seed, clauses_dict):
     return cls
 
 
-def get_index_from_clauses(seed, clauses_dict):
+def get_index_from_clauses(seed: List[int], clauses_dict: Dict[Any, Any]) -> List[int]:
     """Get indices corresponding to clauses using a reverse lookup dictionary.
 
     Parameters
@@ -201,7 +216,7 @@ def get_index_from_clauses(seed, clauses_dict):
     return idx
 
 
-def SAT(KB1, KB2):
+def SAT(KB1: List[List[int]], KB2: List[List[int]]) -> bool:
     """Check satisfiability of combined knowledge bases.
 
     Parameters
@@ -225,7 +240,9 @@ def SAT(KB1, KB2):
         return False
 
 
-def skeptical_entailment(scheduler, KB, seed, q):
+def skeptical_entailment(
+    scheduler: CourseScheduler, KB: List[List[int]], seed: List[List[int]], q: CNF
+) -> bool:
     """Check if knowledge base skeptically entails a query.
 
     Parameters
@@ -260,7 +277,12 @@ def skeptical_entailment(scheduler, KB, seed, q):
         return False
 
 
-def getMCS(KB, lits, query, seed):
+def getMCS(
+    KB: List[List[int]],
+    lits: List[List[int]],
+    query: List[List[int]],
+    seed: List[List[int]],
+) -> List[List[int]]:
     """Compute minimal correction set using LBX algorithm.
 
     Parameters
@@ -306,7 +328,13 @@ def getMCS(KB, lits, query, seed):
         return [[]]
 
 
-def getMCS_MaxSAT(scheduler, KB, lits, query, seed):
+def getMCS_MaxSAT(
+    scheduler: CourseScheduler,
+    KB: List[List[int]],
+    lits: List[List[int]],
+    query: List[List[int]],
+    seed: List[List[int]],
+) -> List[List[int]]:
     """Compute minimal correction set using MaxSAT approach.
 
     Parameters
@@ -357,15 +385,9 @@ def getMCS_MaxSAT(scheduler, KB, lits, query, seed):
     return mcs_KB
 
 
-def get_vars(KB):
-    variables = set()
-    for c in KB:
-        for l in c:
-            variables.add(abs(l))
-    return variables
-
-
-def explanation(scheduler, KB, lits, query):
+def explanation(
+    scheduler: Any, KB: List[List[int]], lits: List[List[int]], query: List[List[int]]
+) -> Union[List[str], str]:
     """Generate explanation using hitting set enumeration.
 
     Parameters
@@ -424,7 +446,7 @@ def explanation(scheduler, KB, lits, query):
                 R.hit(relevant_clauses)
 
 
-def add_relevant_clauses(scheduler, C):
+def add_relevant_clauses(scheduler: CourseScheduler, C: List[List[int]]) -> List[str]:
     """Identify relevant template labels for given clauses.
 
     Parameters
@@ -448,7 +470,7 @@ def add_relevant_clauses(scheduler, C):
     return relevant_clauses
 
 
-def repair(KB, model):
+def repair(KB: List[List[int]], model: List[List[int]]) -> List[List[int]]:
     """Repair a knowledge base by removing conflicting clauses based on a model.
 
     Parameters

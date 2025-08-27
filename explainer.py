@@ -1,5 +1,6 @@
 import copy
 import re
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import openai
 from pysat.examples.lbx import LBX
@@ -24,7 +25,12 @@ openai.api_key = ""
 #########################################################################
 
 
-def post_process_explanation(explanation, query, schedule, course_descriptions):
+def post_process_explanation(
+    explanation: str,
+    query: str,
+    schedule: List[List[str]],
+    course_descriptions: Dict[str, str],
+) -> str:
     """Post-process explanation using OpenAI GPT for better readability.
 
     Parameters
@@ -98,7 +104,7 @@ Post-processed explanation:"""
     return post_processed_explanation
 
 
-def process_query(scheduler, schedule, query):
+def process_query(scheduler: Any, schedule: List[List[str]], query: str) -> List[str]:
     """Process natural language query using OpenAI to extract course information.
 
     Parameters
@@ -672,7 +678,9 @@ def explain_why_not_query(
     return explanations
 
 
-def semantic_similarity(pre_processed_explanation, post_processed_explanation):
+def semantic_similarity(
+    pre_processed_explanation: str, post_processed_explanation: List[str]
+) -> float:
     """Calculate semantic similarity between pre and post-processed explanations.
 
     Parameters
