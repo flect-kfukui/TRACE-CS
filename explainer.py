@@ -1,7 +1,9 @@
 import copy
+import os
 from typing import Any, Dict, List, Tuple, Union
 
 import openai
+from dotenv import load_dotenv
 from pysat.examples.lbx import LBX
 from pysat.examples.optux import OptUx
 from pysat.formula import CNF, WCNF
@@ -11,9 +13,11 @@ from sentence_transformers import SentenceTransformer, SimilarityFunction
 from scheduler import CourseScheduler
 from utils import SAT, explanation, repair
 
+load_dotenv()
+
 #########################################################################
 """ OpenAI Key"""
-openai.api_key = ""
+openai.api_key = os.environ.get("OPENAI_API_KEY")
 #########################################################################
 
 
