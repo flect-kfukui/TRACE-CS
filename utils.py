@@ -9,6 +9,19 @@ from pysat.solvers import Solver
 
 
 def get_vars(KB):
+    """Extract all unique variables from a knowledge base.
+
+    Parameters
+    ----------
+    KB : list of list of int
+        Knowledge base represented as a list of clauses, where each clause
+        is a list of literals (positive or negative integers).
+
+    Returns
+    -------
+    set of int
+        Set of all unique variable identifiers (absolute values of literals).
+    """
     variables = set()
     for c in KB:
         for l in c:
@@ -17,6 +30,20 @@ def get_vars(KB):
 
 
 def map_explanation(explanation, vpool):
+    """Map explanation indices to their corresponding objects using a variable pool.
+
+    Parameters
+    ----------
+    explanation : list of list of int
+        List of explanations where each explanation is a list of variable indices.
+    vpool : IDPool
+        Variable pool object that maps variable indices to their corresponding objects.
+
+    Returns
+    -------
+    list
+        List of mapped explanation objects, flattened from all sub-explanations.
+    """
     mapped_explanation = []
     for e in explanation:
         sub_e = [vpool.obj(i) for i in e if i > 0 and vpool.obj(i)]
@@ -25,6 +52,24 @@ def map_explanation(explanation, vpool):
 
 
 def get_MUS(public, private, q, vpool):
+    """Compute a minimal unsatisfiable set (MUS) from public and private knowledge bases.
+
+    Parameters
+    ----------
+    public : list of list of int or None
+        Public clauses to be added with weight 1.
+    private : list of list of int or None
+        Private clauses to be added with weight 100.
+    q : CNF
+        Query formula to be negated and added to the weighted CNF.
+    vpool : IDPool
+        Variable pool for managing variable indices.
+
+    Returns
+    -------
+    list of list of int
+        List of clauses forming the minimal unsatisfiable set.
+    """
     # Compute a minimal unsatisfiable set
     wcnf2 = WCNF()
     if public:
@@ -47,6 +92,24 @@ def get_MUS(public, private, q, vpool):
 
 
 def get_MCS(public, private, q, vpool):
+    """Compute minimal correction set (MCS) using LBX algorithm.
+
+    Parameters
+    ----------
+    public : list of list of int or None
+        Public clauses to be added with weight 1.
+    private : list of list of int or None
+        Private clauses to be added with weight 100.
+    q : CNF
+        Query formula to be added to the weighted CNF.
+    vpool : IDPool
+        Variable pool for managing variable indices.
+
+    Returns
+    -------
+    list of list of int
+        List of clauses forming the minimal correction set.
+    """
     # Compute minimal hitting set
     wcnf = WCNF()
     if public:
@@ -67,6 +130,20 @@ def get_MCS(public, private, q, vpool):
 
 
 def create_lookup_dict(clasues):
+    """Create bidirectional lookup dictionaries for clauses.
+
+    Parameters
+    ----------
+    clasues : list
+        List of clause labels or identifiers.
+
+    Returns
+    -------
+    tuple of (defaultdict, defaultdict)
+        A tuple containing:
+        - idx_to_cls: Maps indices (1-based) to clause labels
+        - cls_to_index: Maps clause labels to indices (1-based)
+    """
     idx_to_cls = defaultdict()
     cls_to_index = defaultdict()
 
@@ -77,6 +154,20 @@ def create_lookup_dict(clasues):
 
 
 def get_clauses_from_index(seed, clauses_dict):
+    """Retrieve clauses from indices using a lookup dictionary.
+
+    Parameters
+    ----------
+    seed : list of int or None
+        List of indices to look up in the clauses dictionary.
+    clauses_dict : dict
+        Dictionary mapping indices to clauses.
+
+    Returns
+    -------
+    list
+        List of clauses corresponding to the provided indices.
+    """
     cls = []
     if seed:
         # seed = [item for sublist in seed for item in sublist]
@@ -88,6 +179,20 @@ def get_clauses_from_index(seed, clauses_dict):
 
 
 def get_index_from_clauses(seed, clauses_dict):
+    """Get indices corresponding to clauses using a reverse lookup dictionary.
+
+    Parameters
+    ----------
+    seed : list
+        List of clauses to find indices for.
+    clauses_dict : dict
+        Dictionary mapping indices/keys to clause values.
+
+    Returns
+    -------
+    list of int
+        List of indices corresponding to the input clauses.
+    """
     idx = []
     for s in seed:
         for key, val in clauses_dict.items():
@@ -97,6 +202,20 @@ def get_index_from_clauses(seed, clauses_dict):
 
 
 def SAT(KB1, KB2):
+    """Check satisfiability of combined knowledge bases.
+
+    Parameters
+    ----------
+    KB1 : list of list of int
+        First knowledge base as a list of clauses.
+    KB2 : list of list of int
+        Second knowledge base as a list of clauses.
+
+    Returns
+    -------
+    bool
+        True if the combined knowledge bases are satisfiable, False otherwise.
+    """
     s = Solver(name="g4")
     for k in KB1 + KB2:
         s.add_clause(k)
@@ -107,6 +226,24 @@ def SAT(KB1, KB2):
 
 
 def skeptical_entailment(scheduler, KB, seed, q):
+    """Check if knowledge base skeptically entails a query.
+
+    Parameters
+    ----------
+    scheduler : CourseScheduler
+        Scheduler object containing variable pool information.
+    KB : list of list of int
+        Knowledge base as a list of clauses.
+    seed : list of list of int
+        Additional seed clauses.
+    q : CNF
+        Query formula to check entailment for.
+
+    Returns
+    -------
+    bool
+        True if KB skeptically entails the query, False otherwise.
+    """
     # Check if KB entails a query
     s = Solver()
     for k in KB:
@@ -124,6 +261,24 @@ def skeptical_entailment(scheduler, KB, seed, q):
 
 
 def getMCS(KB, lits, query, seed):
+    """Compute minimal correction set using LBX algorithm.
+
+    Parameters
+    ----------
+    KB : list of list of int
+        Knowledge base as a list of clauses.
+    lits : list of list of int
+        Additional literals/clauses.
+    query : list of list of int
+        Query clauses to be added as hard constraints.
+    seed : list of list of int
+        Seed clauses to be added as hard constraints.
+
+    Returns
+    -------
+    list of list of int
+        Minimal correction set as a list of clauses, or [[]] if no MCS found.
+    """
 
     wcnf = WCNF()
 
@@ -152,6 +307,26 @@ def getMCS(KB, lits, query, seed):
 
 
 def getMCS_MaxSAT(scheduler, KB, lits, query, seed):
+    """Compute minimal correction set using MaxSAT approach.
+
+    Parameters
+    ----------
+    scheduler : CourseScheduler
+        Scheduler object containing templates for constraint mapping.
+    KB : list of list of int
+        Knowledge base as a list of clauses.
+    lits : list of list of int
+        Additional literals/clauses.
+    query : list of list of int
+        Query clauses to be added as hard constraints.
+    seed : list of list of int
+        Seed clauses to be added as hard constraints.
+
+    Returns
+    -------
+    list of list of int
+        Minimal correction set based on scheduler templates.
+    """
     wcnf = WCNF()
 
     # add seed as hard
@@ -191,6 +366,24 @@ def get_vars(KB):
 
 
 def explanation(scheduler, KB, lits, query):
+    """Generate explanation using hitting set enumeration.
+
+    Parameters
+    ----------
+    scheduler : CourseScheduler
+        Scheduler object containing constraint templates.
+    KB : list of list of int
+        Knowledge base as a list of clauses.
+    lits : list of list of int
+        Additional literals/clauses.
+    query : list of list of int
+        Query clauses to find explanation for.
+
+    Returns
+    -------
+    list or str
+        Template explanation labels if found, otherwise "No explanation".
+    """
 
     # idx2cls, cls2idx = create_lookup_dict(scheduler.templates)
 
@@ -232,6 +425,20 @@ def explanation(scheduler, KB, lits, query):
 
 
 def add_relevant_clauses(scheduler, C):
+    """Identify relevant template labels for given clauses.
+
+    Parameters
+    ----------
+    scheduler : CourseScheduler
+        Scheduler object containing constraint templates.
+    C : list of list of int
+        List of clauses to find relevant templates for.
+
+    Returns
+    -------
+    list of str
+        List of template labels that contain the given clauses.
+    """
     relevant_clauses = []
     for c in C:
         for label in scheduler.templates:
@@ -242,6 +449,20 @@ def add_relevant_clauses(scheduler, C):
 
 
 def repair(KB, model):
+    """Repair a knowledge base by removing conflicting clauses based on a model.
+
+    Parameters
+    ----------
+    KB : list of list of int
+        Knowledge base as a list of clauses.
+    model : list of list of int
+        Model constraints to be satisfied.
+
+    Returns
+    -------
+    list of list of int
+        Repaired knowledge base with conflicting clauses removed and model added.
+    """
     wcnf = WCNF()
     for c in KB:
         wcnf.append(c, weight=1)

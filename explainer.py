@@ -25,6 +25,24 @@ openai.api_key = ""
 
 
 def post_process_explanation(explanation, query, schedule, course_descriptions):
+    """Post-process explanation using OpenAI GPT for better readability.
+
+    Parameters
+    ----------
+    explanation : str
+        Raw explanation text from the solver.
+    query : str
+        Original user query that triggered the explanation.
+    schedule : list of list of str
+        Course schedule as list of semesters containing course codes.
+    course_descriptions : dict
+        Dictionary mapping course codes to their descriptions.
+
+    Returns
+    -------
+    str
+        Post-processed explanation that is more understandable and coherent.
+    """
     # Get the scheduled course codes
     scheduled_course_codes = [course for semester in schedule for course in semester]
 
@@ -81,6 +99,23 @@ Post-processed explanation:"""
 
 
 def process_query(scheduler, schedule, query):
+    """Process natural language query using OpenAI to extract course information.
+
+    Parameters
+    ----------
+    scheduler : CourseScheduler
+        Scheduler object containing course information.
+    schedule : list of list of str
+        Current course schedule as list of semesters containing course codes.
+    query : str
+        Natural language query from the user.
+
+    Returns
+    -------
+    list of str
+        List of extracted course information strings in the format:
+        "Course Name: <name>, Semester: <semester>, Condition: <condition>".
+    """
 
     # Format the schedule and course descriptions
     schedule_str = "\n".join(
@@ -211,6 +246,21 @@ def process_query(scheduler, schedule, query):
 
 
 def post_process_query(scheduler, extracted_info):
+    """Post-process extracted query information and validate course/semester constraints.
+
+    Parameters
+    ----------
+    scheduler : CourseScheduler
+        Scheduler object containing course and scheduling information.
+    extracted_info : list of str
+        List of extracted course information strings from process_query.
+
+    Returns
+    -------
+    list of tuple
+        List of tuples containing (course_code, semester, condition, query_var)
+        where condition may be a boolean or error message string.
+    """
     print(extracted_info)
     query_data = []
     for info in extracted_info:
@@ -319,6 +369,26 @@ def post_process_query(scheduler, extracted_info):
 def contrastive_explanations(
     scheduler, schedules, current_schedule_index, true_lits, query_data
 ):
+    """Generate contrastive explanations for why certain scheduling decisions were made.
+
+    Parameters
+    ----------
+    scheduler : CourseScheduler
+        Scheduler object containing constraints and course information.
+    schedules : list of list of list of str
+        All generated schedules as lists of semesters containing course codes.
+    current_schedule_index : int
+        Index of the current schedule being analyzed.
+    true_lits : list of list of list of int
+        True literals for each schedule.
+    query_data : list of tuple
+        Processed query data as tuples of (course_code, semester, condition, query_var).
+
+    Returns
+    -------
+    list of str
+        List of explanation strings for the contrastive query.
+    """
     """Contrastive Explanation Generation"""
     # Works well for one query now.
 
@@ -453,6 +523,26 @@ def contrastive_explanations(
 def explain_why_not_query(
     scheduler, schedules, current_schedule_index, true_lits, query_data
 ):
+    """Generate explanations for why certain courses are not in the schedule.
+
+    Parameters
+    ----------
+    scheduler : CourseScheduler
+        Scheduler object containing constraints and course information.
+    schedules : list of list of list of str
+        All generated schedules as lists of semesters containing course codes.
+    current_schedule_index : int
+        Index of the current schedule being analyzed.
+    true_lits : list of list of list of int
+        True literals for each schedule.
+    query_data : list of tuple
+        Processed query data as tuples of (course_code, semester, condition, query_var).
+
+    Returns
+    -------
+    list of str
+        List of explanation strings for why courses are not scheduled.
+    """
     """Contrastive Explanations: Why not course X in semester Y, ..."""
 
     scheduled_courses = [
@@ -583,6 +673,20 @@ def explain_why_not_query(
 
 
 def semantic_similarity(pre_processed_explanation, post_processed_explanation):
+    """Calculate semantic similarity between pre and post-processed explanations.
+
+    Parameters
+    ----------
+    pre_processed_explanation : str
+        Raw explanation text before post-processing.
+    post_processed_explanation : list of str
+        Post-processed explanation text(s).
+
+    Returns
+    -------
+    float
+        Cosine similarity score between the two explanations.
+    """
     model = SentenceTransformer("dmlls/all-mpnet-base-v2-negation", device="mps")
     # model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2", device='mps')
 

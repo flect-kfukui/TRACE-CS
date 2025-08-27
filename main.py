@@ -60,6 +60,11 @@ schedule_frame.grid(row=0, column=0, padx=10, pady=10, sticky=(tk.W, tk.E, tk.N,
 
 # Function to export the schedule to a file
 def export_schedule():
+    """Export the current schedule to a text file.
+
+    Opens a file dialog for the user to choose save location and exports
+    the complete semester-by-semester schedule including taken courses.
+    """
     file_path = filedialog.asksaveasfilename(
         defaultextension=".txt",
         filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")],
@@ -293,6 +298,12 @@ confirmation_frame.pack(fill=tk.X, padx=5, pady=(0, 5))
 
 
 def submit_query():
+    """Process user query and display verification information.
+
+    Extracts course and semester information from the natural language query,
+    validates the extracted information, and displays it for user confirmation
+    before generating explanations.
+    """
     query = query_input.get()
     extracted_info = process_query(scheduler, schedules[current_schedule_index], query)
     query_data = post_process_query(scheduler, extracted_info)
@@ -360,6 +371,15 @@ def submit_query():
 
 
 def confirm_query(query, query_data):
+    """Generate and display contrastive explanations for the confirmed query.
+
+    Parameters
+    ----------
+    query : str
+        The original user query.
+    query_data : list of tuple
+        Processed query data containing course, semester, and condition information.
+    """
     global current_schedule_index
 
     explanations = contrastive_explanations(

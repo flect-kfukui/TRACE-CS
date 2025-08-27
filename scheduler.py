@@ -9,6 +9,12 @@ from pysat.solvers import Solver
 
 
 class CourseScheduler:
+    """A course scheduling system for CS degree requirements.
+
+    This class generates valid course schedules that satisfy degree requirements,
+    prerequisites, credit constraints, and user preferences using SAT solving.
+    """
+
     def __init__(
         self,
         core_courses_file,
@@ -19,6 +25,25 @@ class CourseScheduler:
         social_electives_file,
         user_input_file,
     ):
+        """Initialize the CourseScheduler with course data and user preferences.
+
+        Parameters
+        ----------
+        core_courses_file : str
+            Path to JSON file containing core CS courses.
+        methods_elective_files : str
+            Path to JSON file containing methods elective courses.
+        systems_elective_files : str
+            Path to JSON file containing systems elective courses.
+        cs_electives_file : str
+            Path to JSON file containing CS elective courses.
+        sciences_electives_file : str
+            Path to JSON file containing science elective courses.
+        social_electives_file : str
+            Path to JSON file containing social/humanities elective courses.
+        user_input_file : str
+            Path to JSON file containing user preferences and constraints.
+        """
         with open(user_input_file, "r") as file:
             user_input = json.load(file)
         self.current_semester = user_input["current_semester"]
@@ -72,6 +97,15 @@ class CourseScheduler:
         self.cnf = WCNF()
 
     def load_courses(self, file_path, course_type=None):
+        """Load courses from a JSON file and assign course type.
+
+        Parameters
+        ----------
+        file_path : str
+            Path to JSON file containing course information.
+        course_type : str, optional
+            Type of courses being loaded (e.g., 'core', 'cs_elective').
+        """
         with open(file_path, "r") as file:
             courses = json.load(file)
         for course in courses:
@@ -79,6 +113,13 @@ class CourseScheduler:
             self.courses[course["code"]] = course
 
     def extract_prerequisites(self):
+        """Extract prerequisites information from loaded courses.
+
+        Returns
+        -------
+        dict
+            Dictionary mapping course codes to their prerequisite lists.
+        """
         prerequisites = {}
         for course_code, course in self.courses.items():
             prereqs = course["prerequisites"]
@@ -86,12 +127,35 @@ class CourseScheduler:
         return prerequisites
 
     def var(self, c, s=None):
+        """Generate SAT variable for a course or course-semester combination.
+
+        Parameters
+        ----------
+        c : int
+            Course index.
+        s : int, optional
+            Semester index. If None, returns general course variable.
+
+        Returns
+        -------
+        int
+            SAT variable ID for the course or course-semester combination.
+        """
         if s is None:
             return self.vpool.id(f"c{c}")
         else:
             return self.vpool.id(f"c{c}_s{s}")
 
     def generate_constraints(self):
+        """Generate SAT constraints for course scheduling requirements.
+
+        Creates constraints for:
+        - Core course requirements
+        - Credit limits per semester and by category
+        - Elective requirements
+        - Prerequisites
+        - User preferences
+        """
 
         # Create a dictionary to map clauses to their names
         self.templates = {}
@@ -417,6 +481,17 @@ class CourseScheduler:
                             ] = [clause]
 
     def solve(self):
+        """Solve the course scheduling problem and generate multiple schedules.
+
+        Returns
+        -------
+        tuple of (list, list, list)
+            A tuple containing:
+            - schedules: List of valid course schedules, each as a list of
+              semesters containing course codes
+            - models: List of SAT solver models corresponding to each schedule
+            - true_courses_lits: List of true course literals for each schedule
+        """
         self.generate_constraints()
         # print(len(self.cnf.hard+ self.cnf.soft))
         # print(self.var_to_course[2])
