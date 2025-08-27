@@ -312,7 +312,7 @@ class CourseScheduler:
                 for course_code, course in self.courses.items()
                 if course["type"] == "science_elective"
             ]
-            logger.debug(f"clause: {clause}")
+            # logger.debug(f"clause: {clause}")
             self.cnf.extend(clause)
             self.templates["You cannot take any more science elective courses."] = (
                 clause
@@ -434,7 +434,7 @@ class CourseScheduler:
                 clauses = []
                 for s in range(self.num_semesters):
                     clause = [self.var(course_index), -self.var(course_index, s)]
-                    logger.debug(f"clause: {clause}")
+                    # logger.debug(f"clause: {clause}")
                     self.cnf.append(clause)
                     clauses.append(clause)
                 self.templates[

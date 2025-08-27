@@ -36,7 +36,9 @@ scheduler: CourseScheduler = CourseScheduler(
     social_electives_file,
     user_input_file,
 )
+logger.debug("Solving the scheduling problem...")
 schedules, models, true_lits = scheduler.solve()
+logger.debug("Done.")
 current_schedule_index: int = 0
 current_explanation_index: int = 0
 
@@ -174,7 +176,7 @@ def update_schedule_display() -> None:
 
             logger.debug(f"Displaying courses for Semester {i+1}")
             for j, course in enumerate(schedules[current_schedule_index][i]):
-                logger.debug(f"Displaying course: {course}")
+                # logger.debug(f"Displaying course: {course}")
                 course_button = ttk.Button(
                     schedule_frame, text=course, style="Green.TButton"
                 )

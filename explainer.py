@@ -46,6 +46,8 @@ def post_process_explanation(
     str
         Post-processed explanation that is more understandable and coherent.
     """
+    logger.debug(f"Raw explanation: {explanation}")
+
     # Get the scheduled course codes
     scheduled_course_codes = [course for semester in schedule for course in semester]
 
@@ -83,6 +85,7 @@ Explanation:
 {explanation}
 Post-processed explanation:"""
 
+    logger.debug(f"Prompt for post-processing: {prompt}")
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
@@ -230,6 +233,7 @@ def process_query(
 
     Extracted information:"""
 
+    logger.debug(f"Prompt for query processing: {prompt}")
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
