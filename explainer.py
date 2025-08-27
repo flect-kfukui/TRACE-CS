@@ -1,23 +1,15 @@
 import copy
-import re
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Tuple
 
 import openai
 from pysat.examples.lbx import LBX
 from pysat.examples.optux import OptUx
-from pysat.examples.rc2 import RC2
-from pysat.formula import CNF, WCNF, IDPool
+from pysat.formula import CNF, WCNF
 from pysat.solvers import Solver
 from sentence_transformers import SentenceTransformer, SimilarityFunction
 
-from utils import (
-    SAT,
-    add_relevant_clauses,
-    explanation,
-    getMCS,
-    repair,
-    skeptical_entailment,
-)
+from scheduler import CourseScheduler
+from utils import SAT, explanation, repair
 
 #########################################################################
 """ OpenAI Key"""
@@ -104,7 +96,9 @@ Post-processed explanation:"""
     return post_processed_explanation
 
 
-def process_query(scheduler: Any, schedule: List[List[str]], query: str) -> List[str]:
+def process_query(
+    scheduler: CourseScheduler, schedule: List[List[str]], query: str
+) -> List[str]:
     """Process natural language query using OpenAI to extract course information.
 
     Parameters
@@ -251,7 +245,9 @@ def process_query(scheduler: Any, schedule: List[List[str]], query: str) -> List
     return extracted_info
 
 
-def post_process_query(scheduler, extracted_info):
+def post_process_query(
+    scheduler: CourseScheduler, extracted_info: List[str]
+) -> List[Tuple[str, Any, Any, Any]]:
     """Post-process extracted query information and validate course/semester constraints.
 
     Parameters
@@ -373,8 +369,12 @@ def post_process_query(scheduler, extracted_info):
 
 
 def contrastive_explanations(
-    scheduler, schedules, current_schedule_index, true_lits, query_data
-):
+    scheduler: CourseScheduler,
+    schedules: List[List[List[str]]],
+    current_schedule_index: int,
+    true_lits: List[List[List[int]]],
+    query_data: List[Tuple[str, int, bool, int]],
+) -> List[str]:
     """Generate contrastive explanations for why certain scheduling decisions were made.
 
     Parameters
@@ -527,8 +527,12 @@ def contrastive_explanations(
 
 
 def explain_why_not_query(
-    scheduler, schedules, current_schedule_index, true_lits, query_data
-):
+    scheduler: CourseScheduler,
+    schedules: List[List[List[str]]],
+    current_schedule_index: int,
+    true_lits: List[List[List[int]]],
+    query_data: List[Tuple[str, int, bool, int]],
+) -> List[str]:
     """Generate explanations for why certain courses are not in the schedule.
 
     Parameters

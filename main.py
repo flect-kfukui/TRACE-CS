@@ -1,41 +1,32 @@
-import copy
 import tkinter as tk
 from tkinter import filedialog
-from typing import Any, Dict, List, Optional
+from typing import Any, List
 
 import ttkbootstrap as ttk
-from pysat.card import CardEnc, EncType
-from pysat.examples.lbx import LBX
-from pysat.examples.optux import OptUx
-from pysat.examples.rc2 import RC2
-from pysat.formula import CNF, WCNF, IDPool
-from pysat.solvers import Solver
 
 from explainer import (
     contrastive_explanations,
     post_process_explanation,
     post_process_query,
     process_query,
-    repair,
     semantic_similarity,
 )
-from scheduler import *
-from utils import *
+from scheduler import CourseScheduler
 
 """------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
    ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"""
 
 
 # Load course data
-core_courses_file = "./files/core_courses.json"
-cs_electives_file = "./files/CS_electives.json"
-sciences_electives_file = "./files/sciences_electives.json"
-social_electives_file = "./files/social_electives.json"
-methods_electives_file = "./files/methods_electives.json"
-systems_electives_file = "./files/systems_electives.json"
-user_input_file = "./files/user_input.json"
+core_courses_file: str = "./files/core_courses.json"
+cs_electives_file: str = "./files/CS_electives.json"
+sciences_electives_file: str = "./files/sciences_electives.json"
+social_electives_file: str = "./files/social_electives.json"
+methods_electives_file: str = "./files/methods_electives.json"
+systems_electives_file: str = "./files/systems_electives.json"
+user_input_file: str = "./files/user_input.json"
 
-scheduler = CourseScheduler(
+scheduler: CourseScheduler = CourseScheduler(
     core_courses_file,
     methods_electives_file,
     systems_electives_file,
@@ -45,8 +36,8 @@ scheduler = CourseScheduler(
     user_input_file,
 )
 schedules, models, true_lits = scheduler.solve()
-current_schedule_index = 0
-current_explanation_index = 0
+current_schedule_index: int = 0
+current_explanation_index: int = 0
 
 
 """GUI"""
@@ -109,7 +100,7 @@ style.configure("Gray.TButton", background="gray", foreground="white")
 #     details_text.insert(tk.END, f"Course: {course}\n")
 #     details_text.insert(tk.END, f"Credit Units: {scheduler.courses[course]['credit_units']}\n")
 #     details_text.insert(tk.END, f"Prerequisites: {', '.join(scheduler.courses[course]['prerequisites'])}\n")
-def display_course_details(event, course):
+def display_course_details(event: tk.Event, course: str) -> None:
     tooltip_label.configure(
         text=f"Course: {course}\nCredit Units: {scheduler.courses[course]['credit_units']}\nPrerequisites: {', '.join(scheduler.courses[course]['prerequisites'])}"
     )
@@ -117,7 +108,7 @@ def display_course_details(event, course):
     tooltip.geometry(f"+{event.x_root+10}+{event.y_root+10}")
 
 
-def hide_course_details(event):
+def hide_course_details(event: tk.Event) -> None:
     tooltip.withdraw()
 
 
@@ -131,14 +122,14 @@ for i in range(scheduler.total_semesters):
     semester_label.grid(row=0, column=i, padx=10, pady=5)
 
 
-def previous_schedule():
+def previous_schedule() -> None:
     global current_schedule_index
     current_schedule_index = (current_schedule_index - 1) % len(schedules)
     update_schedule_display()
     update_navigation_buttons()
 
 
-def next_schedule():
+def next_schedule() -> None:
     global current_schedule_index
     # print("Next Schedule button clicked")
     # print("Current schedule index before:", current_schedule_index)
@@ -148,7 +139,7 @@ def next_schedule():
     update_navigation_buttons()
 
 
-def update_navigation_buttons():
+def update_navigation_buttons() -> None:
     previous_schedule_button.config(
         state=tk.NORMAL if current_schedule_index > 0 else tk.DISABLED
     )
@@ -254,7 +245,7 @@ similarity_frame = ttk.Frame(details_frame)
 similarity_frame.pack(fill=tk.X, padx=5, pady=(0, 5))
 
 
-def update_explanation_display():
+def update_explanation_display() -> None:
     explanation_text.delete(1.0, tk.END)
     if explanation_text.explanations:
         explanation = explanation_text.explanations[current_explanation_index]
@@ -314,7 +305,7 @@ def submit_query() -> None:
     invalid_query = False
     verification_text = ""
     for course_code, semester_number, condition, query_var in query_data:
-        if condition != True and condition != False:
+        if condition is not True and condition is not False:
             # print(f"Wrong query: {condition}")
             verification_text += (
                 f"Invalid query: {condition} Please type another query.\n"
@@ -436,8 +427,8 @@ def confirm_query(query: str, query_data: List[Any]) -> None:
 
 
 def calculate_semantic_similarity(
-    pre_processed_explanation, post_processed_explanation
-):
+    pre_processed_explanation: str, post_processed_explanation: List[str]
+) -> None:
 
     similarity = semantic_similarity(
         pre_processed_explanation, post_processed_explanation

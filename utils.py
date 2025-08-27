@@ -27,8 +27,9 @@ def get_vars(KB: List[List[int]]) -> Set[int]:
     """
     variables = set()
     for c in KB:
-        for l in c:
-            variables.add(abs(l))
+        for literal in c:
+            variables.add(abs(literal))
+
     return variables
 
 
@@ -94,6 +95,7 @@ def get_MUS(
 
     solver = OptUx(wcnf2)
     mus = solver.compute()
+    assert mus is not None
     expl = [list(wcnf2.soft[m - 1]) for m in mus]
     return expl
     return map_explanation(expl, vpool)
@@ -139,6 +141,7 @@ def get_MCS(
     lbx = LBX(wcnf, use_cld=True, solver_name="g3")
     # Compute mcs and return the clauses indexes
     mcs = lbx.compute()
+    assert mcs is not None
     return [list(wcnf.soft[m - 1]) for m in mcs]
 
 
@@ -270,7 +273,7 @@ def skeptical_entailment(
     # add negation of query
 
     s.append_formula(q.negate(topv=scheduler.vpool.top).clauses)
-    if s.solve() == False:
+    if s.solve() is False:
         s.delete()
         return True
     else:
@@ -315,8 +318,8 @@ def getMCS(
     for k in KB:
         if k not in seed:
             wcnf.append(k, weight=1)
-    for l in lits:
-        wcnf.append(l, weight=0)
+    for literal in lits:
+        wcnf.append(literal, weight=0)
 
     lbx = LBX(wcnf, solver_name="g4", use_cld=True, use_timer=True)
     mcs = lbx.compute()
@@ -364,8 +367,8 @@ def getMCS_MaxSAT(
     # add query as hard
     wcnf.extend(query)
 
-    for l in lits:
-        wcnf.append(l)
+    for literal in lits:
+        wcnf.append(literal)
 
     # add KB clauses as soft
     for k in KB:
@@ -409,7 +412,6 @@ def explanation(
 
     # idx2cls, cls2idx = create_lookup_dict(scheduler.templates)
 
-    blocked = []
     R = Hitman(htype="maxsat")  # Reconciliation formula
     # wcnf = WCNF()
     # for c in KB:
@@ -424,7 +426,7 @@ def explanation(
         seed = R.get()
         e_plus = []
         template_expl = []
-        if seed == None:
+        if seed is None:
             return "No explanation"
         for s in seed:
             e_plus.extend(scheduler.templates[s])
@@ -491,6 +493,7 @@ def repair(KB: List[List[int]], model: List[List[int]]) -> List[List[int]]:
     wcnf.extend(model)
     MCS = LBX(wcnf, solver_name="CryptoMinisat")
     mcs = MCS.compute()
+    assert mcs is not None
     mcs_clauses = [list(wcnf.soft[m - 1]) for m in mcs]
     new_KB = [c for c in KB if c not in mcs_clauses]
     new_KB.extend(model)

@@ -1,11 +1,10 @@
 import json
 import random
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pysat.card import CardEnc
-from pysat.examples.rc2 import RC2
 from pysat.formula import WCNF, IDPool
-from pysat.pb import *
+from pysat.pb import EncType, PBEnc
 from pysat.solvers import Solver
 
 
@@ -15,6 +14,30 @@ class CourseScheduler:
     This class generates valid course schedules that satisfy degree requirements,
     prerequisites, credit constraints, and user preferences using SAT solving.
     """
+
+    # Class attributes with type hints
+    current_semester: int
+    taken_courses: Dict[str, List[str]]
+    preferred_courses_weights: Dict[str, float]
+    total_semesters: int
+    num_semesters: int
+    max_schedule_count: int
+    courses: Dict[str, Dict[str, Any]]
+    total_credits: int
+    methods_electives_credits: int
+    systems_electives_credits: int
+    cs_electives_credits: int
+    sciences_electives_credits: int
+    social_electives_credits: int
+    courses_taken: List[str]
+    num_courses: int
+    prerequisites: Dict[str, List[str]]
+    course_codes: List[str]
+    vpool: IDPool
+    cnf: WCNF
+    templates: Dict[str, List[List[int]]]
+    course_vars: Dict[str, Dict[str, Any]]
+    var_to_course: Dict[int, Union[str, Tuple[str, int]]]
 
     def __init__(
         self,
