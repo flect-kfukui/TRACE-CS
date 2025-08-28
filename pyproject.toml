@@ -1,0 +1,15 @@
+[project]
+name = "trace-cs"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "loguru>=0.7.3",
+    "openai==0.28.0",
+    "pypblib>=0.0.4",
+    "python-dotenv>=1.1.1",
+    "python-sat==1.8.dev13",
+    "sentence-transformers==3.0.1",
+    "ttkbootstrap==1.10.1",
+]
